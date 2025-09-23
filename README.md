@@ -137,4 +137,4 @@ bookshelf/
 └── next.config.ts
 ```
 
-e dar uma estrela no repositório!
+
