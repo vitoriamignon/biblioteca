@@ -7,19 +7,19 @@ type CardProps = {
 };
 
 export function Card({ children, className = "" }: CardProps) {
-  return <div className={`bg-white rounded shadow ${className}`}>{children}</div>;
+  return <div className={`bg-card text-card-foreground rounded-lg border border-border shadow-sm ${className}`}>{children}</div>;
 }
 
 export function CardHeader({ children, className = "" }: CardProps) {
-  return <div className={`p-4 border-b ${className}`}>{children}</div>;
+  return <div className={`p-4 border-b border-border ${className}`}>{children}</div>;
 }
 
 export function CardTitle({ children }: { children?: React.ReactNode }) {
-  return <h3 className="text-lg font-semibold">{children}</h3>;
+  return <h3 className="text-lg font-semibold text-card-foreground">{children}</h3>;
 }
 
 export function CardDescription({ children }: { children?: React.ReactNode }) {
-  return <p className="text-sm text-gray-600">{children}</p>;
+  return <p className="text-sm text-muted-foreground">{children}</p>;
 }
 
 export function CardContent({ children, className = "" }: CardProps) {
@@ -27,5 +27,5 @@ export function CardContent({ children, className = "" }: CardProps) {
 }
 
 export function CardFooter({ children, className = "" }: CardProps) {
-  return <div className={`p-4 border-t ${className}`}>{children}</div>;
+  return <div className={`p-4 border-t border-border ${className}`}>{children}</div>;
 }

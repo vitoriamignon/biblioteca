@@ -56,4 +56,14 @@
     color: hsl(var(--foreground));
     transition: background-color 0.3s ease, color 0.3s ease;
   }
+  
+  /* Melhorar visibilidade de elementos interativos no modo escuro */
+  .dark button:not(:disabled):hover {
+    opacity: 0.9;
+  }
+  
+  .dark select option {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
 }

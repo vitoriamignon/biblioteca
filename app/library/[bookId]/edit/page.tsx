@@ -1,7 +1,7 @@
 import EditBookClient from "./EditBookClient";
 
-export default function EditBookPage({ params }: { params: { bookId: string } }) {
-  const { bookId } = params;
+export default async function EditBookPage({ params }: { params: Promise<{ bookId: string }> }) {
+  const { bookId } = await params;
   return (
     <main className="container mx-auto py-10">
       <h1 className="text-2xl font-bold">Editar livro</h1>

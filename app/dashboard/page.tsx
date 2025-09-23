@@ -1,26 +1,11 @@
-import { initialBooks } from "@/lib/data";
-import { Book } from "@/lib/types";
+import { getStats } from "@/lib/actions";
 import Link from "next/link";
 import { Navigation } from "@/components/navigation";
 
-function statTotal(books: Book[]) {
-  return books.length;
-}
+export default async function DashboardPage() {
+  // Buscar dados no servidor
+  const stats = await getStats();
 
-function statReading(books: Book[]) {
-  return books.filter((b) => b.status === "LENDO").length;
-}
-
-function statRead(books: Book[]) {
-  return books.filter((b) => b.status === "LIDO").length;
-}
-
-function statPages(books: Book[]) {
-  return books.reduce((s, b) => s + (b.pages || 0), 0);
-}
-
-export default function DashboardPage() {
-  const books = initialBooks;
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -46,25 +31,54 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="p-4 bg-card border border-border rounded-lg shadow-sm"> 
             <div className="text-sm text-muted-foreground">Total de livros</div>
-            <div className="text-2xl font-bold text-card-foreground">{statTotal(books)}</div>
+            <div className="text-2xl font-bold text-card-foreground">{stats.total}</div>
           </div>
           <div className="p-4 bg-card border border-border rounded-lg shadow-sm"> 
             <div className="text-sm text-muted-foreground">Lendo agora</div>
-            <div className="text-2xl font-bold text-card-foreground">{statReading(books)}</div>
+            <div className="text-2xl font-bold text-card-foreground">{stats.reading}</div>
           </div>
           <div className="p-4 bg-card border border-border rounded-lg shadow-sm"> 
             <div className="text-sm text-muted-foreground">Lidos</div>
-            <div className="text-2xl font-bold text-card-foreground">{statRead(books)}</div>
+            <div className="text-2xl font-bold text-card-foreground">{stats.read}</div>
           </div>
           <div className="p-4 bg-card border border-border rounded-lg shadow-sm"> 
             <div className="text-sm text-muted-foreground">Páginas lidas</div>
-            <div className="text-2xl font-bold text-card-foreground">{statPages(books)}</div>
+            <div className="text-2xl font-bold text-card-foreground">{stats.totalPages.toLocaleString()}</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="p-4 bg-card border border-border rounded-lg shadow-sm">
+            <div className="text-sm text-muted-foreground">Quero ler</div>
+            <div className="text-2xl font-bold text-card-foreground">{stats.wantToRead}</div>
+          </div>
+          <div className="p-4 bg-card border border-border rounded-lg shadow-sm">
+            <div className="text-sm text-muted-foreground">Pausados</div>
+            <div className="text-2xl font-bold text-card-foreground">{stats.paused}</div>
+          </div>
+          <div className="p-4 bg-card border border-border rounded-lg shadow-sm">
+            <div className="text-sm text-muted-foreground">Avaliação média</div>
+            <div className="text-2xl font-bold text-card-foreground">
+              {stats.averageRating > 0 ? stats.averageRating.toFixed(1) : '--'}
+            </div>
           </div>
         </div>
 
         <div className="bg-card border border-border p-6 rounded-lg shadow-sm">
           <h2 className="font-semibold mb-2 text-card-foreground">Bem-vindo ao BookShelf</h2>
-          <p className="text-sm text-muted-foreground">Use o menu acima para navegar. Você pode começar adicionando um novo livro ou explorando sua biblioteca atual.</p>
+          <p className="text-sm text-muted-foreground">
+            Use o menu acima para navegar. Você pode começar adicionando um novo livro ou explorando sua biblioteca atual.
+          </p>
+          <div className="mt-4 flex gap-4 text-sm">
+            <span className="text-muted-foreground">
+              <strong className="text-foreground">{stats.total}</strong> livros na sua biblioteca
+            </span>
+            {stats.total > 0 && (
+              <span className="text-muted-foreground">
+                <strong className="text-foreground">{Math.round((stats.read / stats.total) * 100)}%</strong> lidos
+              </span>
+            )}
+          </div>
         </div>
       </main>
     </div>
