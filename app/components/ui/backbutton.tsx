@@ -9,8 +9,8 @@ export function BackButton() {
 
   return (
     <div className={styles.containerVoltar}>
-      <Button variant="outline" onClick={() => router.back()}>
-        Voltar
+      <Button variant="outline" onClick={() => router.push('/dashboard')}>
+        Voltar ao Dashboard
       </Button>
     </div>
   )
