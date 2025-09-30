@@ -104,6 +104,35 @@ npm run build
 npm run start
 ```
 
+## 🚀 Deploy
+
+### Deploy na Vercel (Recomendado)
+
+1. **Fazer push para GitHub:**
+```bash
+git add .
+git commit -m "feat: implementação completa com SQLite + Prisma"
+git push origin main
+```
+
+2. **Deploy na Vercel:**
+- Acesse [vercel.com](https://vercel.com)
+- Conecte seu repositório GitHub
+- Configure as variáveis de ambiente
+- Deploy automático! 🎉
+
+### Variáveis de Ambiente para Produção:
+```env
+DATABASE_URL="file:./prod.db"
+```
+
+### Deploy em outras plataformas:
+- **Railway:** Suporte nativo a SQLite
+- **Render:** Migrar para PostgreSQL
+- **Netlify:** Requires external database
+
+Consulte [DEPLOY.md](./DEPLOY.md) para instruções detalhadas.
+
 ## 📁 Estrutura do Projeto
 
 ```

@@ -36,7 +36,7 @@ export function DeleteBookButton({ bookId, bookTitle }: DeleteBookButtonProps) {
         
         <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
           <p className="text-sm text-foreground mb-3">
-            Tem certeza que deseja excluir "{bookTitle}"? Esta ação não pode ser desfeita.
+            Tem certeza que deseja excluir &quot;{bookTitle}&quot;? Esta ação não pode ser desfeita.
           </p>
           
           <div className="flex gap-2">

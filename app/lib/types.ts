@@ -9,4 +9,6 @@ export type Book = {
   synopsis: string;
   cover: string; // URL da capa
   status: 'QUERO_LER' | 'LENDO' | 'LIDO' | 'PAUSADO' | 'ABANDONADO';
+  createdAt?: Date;
+  updatedAt?: Date;
 };

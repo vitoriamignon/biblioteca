@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { BookList } from "@/components/book-list";
 import { BackButton } from "@/components/ui/backbutton";
 import { getBooks, getGenres } from "@/lib/actions";
+import { Book } from "@/lib/types";
 
 interface LibraryPageProps {
   searchParams: {
@@ -15,7 +16,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
   const booksPromise = getBooks({
     search: searchParams.search,
     genre: searchParams.genre,
-    status: searchParams.status as any,
+    status: searchParams.status as Book['status'],
   });
   
   const genresPromise = getGenres();

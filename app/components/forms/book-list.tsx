@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Book } from "@/lib/types";
 import { BookCard } from "../book-card";
 import { Input } from "../ui/input";
@@ -18,7 +18,6 @@ interface BookListProps {
 
 export function BookList({ initialBooks, genres = [], currentFilters }: BookListProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   
   const [searchTerm, setSearchTerm] = useState(currentFilters?.search || "");
   const [filterGenre, setFilterGenre] = useState(currentFilters?.genre || "all");
