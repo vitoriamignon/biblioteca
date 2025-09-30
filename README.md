@@ -5,7 +5,7 @@ Uma aplicação moderna e completa para gerenciar sua biblioteca pessoal de livr
 ## ✨ Funcionalidades
 
 ### 📖 Gerenciamento de Livros
-- ✅ **Adicionar livros** com informações completas (título, autor, gênero, ano, páginas, avaliação, sinopse, capa)
+- ✅ **Adicionar livros** com informações completas (título, autor, gênero, ano, páginas, avaliação, sinopse e capa)
 - ✅ **Editar livros** existentes
 - ✅ **Excluir livros** com confirmação
 - ✅ **Visualizar detalhes** completos de cada livro
