@@ -5,18 +5,19 @@ import { getBooks, getGenres } from "@/lib/actions";
 import { Book } from "@/lib/types";
 
 interface LibraryPageProps {
-  searchParams: {
+  searchParams: Promise<{
     search?: string;
     genre?: string;
     status?: string;
-  };
+  }>;
 }
 
 export default async function LibraryPage({ searchParams }: LibraryPageProps) {
+  const params = await searchParams;
   const booksPromise = getBooks({
-    search: searchParams.search,
-    genre: searchParams.genre,
-    status: searchParams.status as Book['status'],
+    search: params.search,
+    genre: params.genre,
+    status: params.status as Book['status'],
   });
   
   const genresPromise = getGenres();
@@ -34,8 +35,8 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
           initialBooks={books} 
           genres={genres}
           currentFilters={{
-            search: searchParams.search || '',
-            genre: searchParams.genre || 'all'
+            search: params.search || '',
+            genre: params.genre || 'all'
           }}
         />
       </Suspense>
