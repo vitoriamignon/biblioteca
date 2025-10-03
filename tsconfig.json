@@ -51,7 +51,7 @@
     "**/*.tsx",
     "next-env.d.ts",
     ".next/types/**/*.ts"
-  ],
+, "scripts/migrate-data.js"  ],
   "exclude": [
     "node_modules"
   ]

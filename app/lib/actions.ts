@@ -3,8 +3,8 @@
 
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { bookDatabase } from './database';
-import { Book } from './types';
+import { prisma } from './prisma'; // ⬅️ Importar Prisma
+import { BookStatus } from '@prisma/client'; // ⬅️ Importar enum do Prisma
 
 // Server Action para criar um novo livro
 export async function createBook(formData: FormData) {
@@ -15,10 +15,14 @@ export async function createBook(formData: FormData) {
       genre: formData.get('genre') as string,
       year: parseInt(formData.get('year') as string),
       pages: parseInt(formData.get('pages') as string),
-      rating: parseInt(formData.get('rating') as string) || 0,
+      rating: parseFloat(formData.get('rating') as string) || 0,
       synopsis: formData.get('synopsis') as string || '',
       cover: formData.get('cover') as string || '',
-      status: (formData.get('status') as Book['status']) || 'QUERO_LER'
+      status: (formData.get('status') as BookStatus) || 'QUERO_LER',
+      // ⬇️ NOVOS CAMPOS
+      currentPage: parseInt(formData.get('currentPage') as string) || 0,
+      isbn: formData.get('isbn') as string || '',
+      notes: formData.get('notes') as string || '',
     };
 
     // Validação básica
@@ -30,7 +34,10 @@ export async function createBook(formData: FormData) {
       throw new Error('Ano e número de páginas são obrigatórios');
     }
 
-    await bookDatabase.createBook(bookData);
+    // ⬇️ USANDO PRISMA - substituir bookDatabase.createBook()
+    await prisma.book.create({
+      data: bookData
+    });
 
     // Revalidar as páginas que mostram livros
     revalidatePath('/library');
@@ -41,16 +48,15 @@ export async function createBook(formData: FormData) {
     throw error;
   }
 
-  // Redirecionar para a biblioteca após criar o livro
   redirect('/library');
 }
 
 // Server Action para atualizar um livro
 export async function updateBook(id: string, formData: FormData) {
   try {
-    const updateData: Partial<Book> = {};
+    const updateData: any = {}; // ⬅️ Mudar para any para flexibilidade
 
-    // Apenas incluir campos que foram preenchidos
+    // Campos existentes
     const title = formData.get('title') as string;
     if (title) updateData.title = title;
 
@@ -67,7 +73,7 @@ export async function updateBook(id: string, formData: FormData) {
     if (pages) updateData.pages = parseInt(pages);
 
     const rating = formData.get('rating') as string;
-    if (rating) updateData.rating = parseInt(rating);
+    if (rating) updateData.rating = parseFloat(rating);
 
     const synopsis = formData.get('synopsis') as string;
     if (synopsis !== null) updateData.synopsis = synopsis;
@@ -75,16 +81,29 @@ export async function updateBook(id: string, formData: FormData) {
     const cover = formData.get('cover') as string;
     if (cover !== null) updateData.cover = cover;
 
-    const status = formData.get('status') as Book['status'];
+    const status = formData.get('status') as BookStatus;
     if (status) updateData.status = status;
 
-    const updatedBook = await bookDatabase.updateBook(id, updateData);
+    // ⬇️ NOVOS CAMPOS
+    const currentPage = formData.get('currentPage') as string;
+    if (currentPage) updateData.currentPage = parseInt(currentPage);
+
+    const isbn = formData.get('isbn') as string;
+    if (isbn !== null) updateData.isbn = isbn;
+
+    const notes = formData.get('notes') as string;
+    if (notes !== null) updateData.notes = notes;
+
+    // ⬇️ USANDO PRISMA - substituir bookDatabase.updateBook()
+    const updatedBook = await prisma.book.update({
+      where: { id },
+      data: updateData
+    });
 
     if (!updatedBook) {
       throw new Error('Livro não encontrado');
     }
 
-    // Revalidar as páginas que mostram livros
     revalidatePath('/library');
     revalidatePath('/dashboard');
     revalidatePath(`/library/${id}`);
@@ -94,20 +113,21 @@ export async function updateBook(id: string, formData: FormData) {
     throw error;
   }
 
-  // Redirecionar para a página do livro após atualizar
   redirect(`/library/${id}`);
 }
 
 // Server Action para excluir um livro
 export async function deleteBook(id: string) {
   try {
-    const deleted = await bookDatabase.deleteBook(id);
+    // ⬇️ USANDO PRISMA - substituir bookDatabase.deleteBook()
+    const deleted = await prisma.book.delete({
+      where: { id }
+    });
 
     if (!deleted) {
       throw new Error('Livro não encontrado');
     }
 
-    // Revalidar as páginas que mostram livros
     revalidatePath('/library');
     revalidatePath('/dashboard');
 
@@ -116,30 +136,39 @@ export async function deleteBook(id: string) {
     throw error;
   }
 
-  // Redirecionar para a biblioteca após excluir
   redirect('/library');
 }
 
-// Server Action para buscar livros (usado em Server Components)
+// Server Action para buscar livros
 export async function getBooks(searchParams?: {
   search?: string;
   genre?: string;
-  status?: Book['status'];
+  status?: BookStatus;
 }) {
   try {
+    let where: any = {};
+
     if (searchParams?.search) {
-      return await bookDatabase.searchBooks(searchParams.search);
+      where.OR = [
+        { title: { contains: searchParams.search, mode: 'insensitive' } },
+        { author: { contains: searchParams.search, mode: 'insensitive' } },
+        { synopsis: { contains: searchParams.search, mode: 'insensitive' } }
+      ];
     }
     
     if (searchParams?.genre && searchParams.genre !== 'all') {
-      return await bookDatabase.getBooksByGenre(searchParams.genre);
+      where.genre = searchParams.genre;
     }
     
     if (searchParams?.status) {
-      return await bookDatabase.getBooksByStatus(searchParams.status);
+      where.status = searchParams.status;
     }
 
-    return await bookDatabase.getAllBooks();
+    // ⬇️ USANDO PRISMA
+    return await prisma.book.findMany({
+      where,
+      orderBy: { createdAt: 'desc' }
+    });
   } catch (error) {
     console.error('Erro ao buscar livros:', error);
     return [];
@@ -149,7 +178,10 @@ export async function getBooks(searchParams?: {
 // Server Action para obter um livro por ID
 export async function getBook(id: string) {
   try {
-    return await bookDatabase.getBookById(id);
+    // ⬇️ USANDO PRISMA
+    return await prisma.book.findUnique({
+      where: { id }
+    });
   } catch (error) {
     console.error('Erro ao buscar livro:', error);
     return null;
@@ -159,7 +191,28 @@ export async function getBook(id: string) {
 // Server Action para obter estatísticas
 export async function getStats() {
   try {
-    return await bookDatabase.getStats();
+    // ⬇️ USANDO PRISMA - substituir bookDatabase.getStats()
+    const [total, reading, read, wantToRead, paused, abandoned, pagesResult, ratingResult] = await Promise.all([
+      prisma.book.count(),
+      prisma.book.count({ where: { status: 'LENDO' } }),
+      prisma.book.count({ where: { status: 'LIDO' } }),
+      prisma.book.count({ where: { status: 'QUERO_LER' } }),
+      prisma.book.count({ where: { status: 'PAUSADO' } }),
+      prisma.book.count({ where: { status: 'ABANDONADO' } }),
+      prisma.book.aggregate({ _sum: { pages: true } }),
+      prisma.book.aggregate({ _avg: { rating: true } })
+    ]);
+
+    return {
+      total,
+      reading,
+      read,
+      wantToRead: wantToRead,
+      paused,
+      abandoned,
+      totalPages: pagesResult._sum.pages || 0,
+      averageRating: ratingResult._avg.rating || 0
+    };
   } catch (error) {
     console.error('Erro ao buscar estatísticas:', error);
     return {
@@ -178,7 +231,10 @@ export async function getStats() {
 // Server Action para obter gêneros
 export async function getGenres() {
   try {
-    return await bookDatabase.getAllGenres();
+    // ⬇️ USANDO PRISMA
+    return await prisma.genre.findMany({
+      orderBy: { name: 'asc' }
+    });
   } catch (error) {
     console.error('Erro ao buscar gêneros:', error);
     return [];

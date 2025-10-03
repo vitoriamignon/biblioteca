@@ -1,3 +1,4 @@
+// app/lib/types.ts
 export type Book = {
   id: string;
   title: string;
@@ -7,8 +8,11 @@ export type Book = {
   pages: number;
   rating: number; // 1-5 estrelas
   synopsis: string;
-  cover: string; // URL da capa
+  cover: string | null;
   status: 'QUERO_LER' | 'LENDO' | 'LIDO' | 'PAUSADO' | 'ABANDONADO';
   createdAt?: Date;
   updatedAt?: Date;
+  currentPage?: number;
+  isbn?: string | null;
+  notes?: string | null;
 };

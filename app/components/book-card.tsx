@@ -34,6 +34,15 @@ export function BookCard({ book }: BookCardProps) {
     'ABANDONADO': 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200 border border-red-200 dark:border-red-800'
   };
 
+  // Calcular progresso de leitura
+  const readingProgress = book.currentPage && book.pages 
+    ? Math.round((book.currentPage / book.pages) * 100)
+    : 0;
+
+  // Verificar se tem informações extras
+  const hasNotes = book.notes && book.notes.trim().length > 0;
+  const hasISBN = book.isbn && book.isbn.trim().length > 0;
+
   return (
     <Card className="w-[320px] h-full flex flex-col hover:shadow-lg transition-shadow duration-200">
       <CardHeader className="pb-3">
@@ -68,7 +77,7 @@ export function BookCard({ book }: BookCardProps) {
         </div>
         
         {/* Informações do livro */}
-        <div className="text-sm text-center space-y-2 flex-grow">
+        <div className="text-sm text-center space-y-2 flex-grow w-full">
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
               <span className="text-muted-foreground">Ano:</span>
@@ -78,11 +87,36 @@ export function BookCard({ book }: BookCardProps) {
               <span className="text-muted-foreground">Páginas:</span>
               <div className="font-medium">{book.pages}</div>
             </div>
+            
+            {/* ⬇️ CORRIGIDO: Página Atual - sempre mostrar se tiver valor */}
+            {book.currentPage && book.currentPage > 0 && (
+              <>
+                <div>
+                  <span className="text-muted-foreground">Página:</span>
+                  <div className="font-medium">{book.currentPage}</div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Progresso:</span>
+                  <div className="font-medium">{readingProgress}%</div>
+                </div>
+              </>
+            )}
+            
             <div className="col-span-2">
               <span className="text-muted-foreground">Gênero:</span>
               <div className="font-medium line-clamp-1" title={book.genre}>{book.genre}</div>
             </div>
           </div>
+
+          {/* ⬇️ CORRIGIDO: Barra de Progresso - só mostrar para livros sendo lidos */}
+          {book.status === 'LENDO' && book.currentPage && book.currentPage > 0 && (
+            <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+              <div 
+                className="bg-green-600 h-2 rounded-full transition-all duration-300" 
+                style={{ width: `${readingProgress}%` }}
+              ></div>
+            </div>
+          )}
 
           {book.rating > 0 && (
             <div className="flex items-center justify-center gap-1 text-yellow-500">
@@ -91,10 +125,26 @@ export function BookCard({ book }: BookCardProps) {
             </div>
           )}
 
-          <div className="pt-2">
-            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusColors[book.status]}`}>
+          {/* ⬇️ CORRIGIDO: Status menor e indicadores extras */}
+          <div className="flex flex-col gap-1 pt-2">
+            {/* Status menor */}
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${statusColors[book.status]} w-fit mx-auto`}>
               {statusLabels[book.status]}
             </span>
+            
+            {/* Indicadores de informações extras */}
+            <div className="flex justify-center gap-1 text-[10px]">
+              {hasISBN && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200 rounded-full border border-purple-200 dark:border-purple-800">
+                  📄 ISBN
+                </span>
+              )}
+              {hasNotes && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200 rounded-full border border-orange-200 dark:border-orange-800">
+                  📝 Notas
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </CardContent>
@@ -114,4 +164,4 @@ export function BookCard({ book }: BookCardProps) {
       </CardFooter>
     </Card>
   );
-}
+} 

@@ -11,20 +11,32 @@ datasource db {
 }
 
 model Book {
-  id        String   @id @default(cuid())
-  title     String
-  author    String
-  genre     String
-  year      Int
-  pages     Int
-  rating    Float
-  synopsis  String
-  cover     String
-  status    BookStatus
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String     @id @default(cuid())
+  title       String
+  author      String
+  year        Int
+  pages       Int
+  rating      Float
+  synopsis    String
+  cover       String?
+  status      BookStatus @default(QUERO_LER)
+  currentPage Int        @default(0)
+  isbn        String?
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  genreId  String?
+  genreRef Genre?  @relation(fields: [genreId], references: [id])
 
   @@map("books")
+}
+
+model Genre {
+  id    String @id @default(cuid())
+  name  String @unique
+  books Book[]
+
+  @@map("genres")
 }
 
 enum BookStatus {

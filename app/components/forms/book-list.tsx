@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -9,7 +8,7 @@ import { Input } from "../ui/input";
 
 interface BookListProps {
   initialBooks: Book[];
-  genres?: string[];
+  genres?: (string | { id: string; name: string })[];
   currentFilters?: {
     search: string;
     genre: string;
@@ -22,11 +21,14 @@ export function BookList({ initialBooks, genres = [], currentFilters }: BookList
   const [searchTerm, setSearchTerm] = useState(currentFilters?.search || "");
   const [filterGenre, setFilterGenre] = useState(currentFilters?.genre || "all");
 
-  // Gerar lista de gêneros disponíveis
+  // Gerar lista de gêneros disponíveis - CORRIGIDO
   const availableGenres = useMemo(() => {
-    const bookGenres = Array.from(new Set(initialBooks.map((book) => book.genre)));
-    const allGenres = genres.length > 0 ? genres : bookGenres;
-    return ["all", ...allGenres];
+    // Se genres for array de objetos, extrair nomes; se for strings, usar diretamente
+    const genreNames = genres.length > 0 
+      ? genres.map(g => typeof g === 'string' ? g : g.name)
+      : Array.from(new Set(initialBooks.map((book) => book.genre)));
+  
+    return ["all", ...genreNames];
   }, [initialBooks, genres]);
 
   // Filtrar livros baseado nos filtros atuais
