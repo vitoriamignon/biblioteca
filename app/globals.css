@@ -2,48 +2,50 @@
 
 @layer base {
   :root {
-    --background: #ffffff;
-    --foreground: #1c1c1c;
+    --background: #fafbfc;
+    --foreground: #1a202c;
     --card: #ffffff;
-    --card-foreground: #1c1c1c;
+    --card-foreground: #2d3748;
     --popover: #ffffff;
-    --popover-foreground: #1c1c1c;
-    --primary: #3a82f6;
-    --primary-foreground: #e6f0fc;
-    --secondary: #cce0f5;
-    --secondary-foreground: #1c1c1c;
-    --muted: #cce0f5;
-    --muted-foreground: #737373;
-    --accent: #cce0f5;
-    --accent-foreground: #1c1c1c;
-    --destructive: #f24d4d;
-    --destructive-foreground: #e6f0fc;
-    --border: #e5e5f0;
-    --input: #e5e5f0;
-    --ring: #3a82f6;
-    --radius: 0.5rem;
+    --popover-foreground: #2d3748;
+    --primary: #667eea;
+    --primary-foreground: #ffffff;
+    --secondary: #f7fafc;
+    --secondary-foreground: #4a5568;
+    --muted: #f1f5f9;
+    --muted-foreground: #718096;
+    --accent: #edf2f7;
+    --accent-foreground: #2d3748;
+    --destructive: #e53e3e;
+    --destructive-foreground: #ffffff;
+    --border: #e2e8f0;
+    --input: #e2e8f0;
+    --ring: #667eea;
+    --radius: 0.75rem;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 
   .dark {
-    --background: #1c1c1c;
-    --foreground: #e6f0fc;
-    --card: #1c1c1c;
-    --card-foreground: #e6f0fc;
-    --popover: #1c1c1c;
-    --popover-foreground: #e6f0fc;
-    --primary: #5c9cf2;
-    --primary-foreground: #1c1c1c;
-    --secondary: #2c2c2c;
-    --secondary-foreground: #e6f0fc;
-    --muted: #2c2c2c;
-    --muted-foreground: #a3a3a3;
-    --accent: #2c2c2c;
-    --accent-foreground: #e6f0fc;
-    --destructive: #802525;
-    --destructive-foreground: #e6f0fc;
-    --border: #2c2c2c;
-    --input: #2c2c2c;
-    --ring: #f0f5fa;
+    --background: #0f172a;
+    --foreground: #f1f5f9;
+    --card: #1e293b;
+    --card-foreground: #f8fafc;
+    --popover: #1e293b;
+    --popover-foreground: #f8fafc;
+    --primary: #8b5cf6;
+    --primary-foreground: #ffffff;
+    --secondary: #334155;
+    --secondary-foreground: #cbd5e1;
+    --muted: #1e293b;
+    --muted-foreground: #94a3b8;
+    --accent: #334155;
+    --accent-foreground: #f1f5f9;
+    --destructive: #dc2626;
+    --destructive-foreground: #ffffff;
+    --border: #374151;
+    --input: #374151;
+    --ring: #8b5cf6;
+    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -51,10 +53,74 @@
   * {
     border-color: var(--border);
   }
+  
   body {
     background-color: var(--background);
     color: var(--foreground);
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
     transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+  }
+
+  /* Scrollbar personalizada */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: var(--muted);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  /* Focus visible melhorado */
+  *:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary), 0 0 0 4px var(--background);
+  }
+
+  /* Animação de entrada */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  /* Gradientes customizados */
+  .gradient-text {
+    background: linear-gradient(to right, var(--primary), #8b5cf6, #ec4899);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  /* Sombras customizadas */
+  .shadow-soft {
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 4px 16px -4px rgba(0, 0, 0, 0.04);
+  }
+
+  .dark .shadow-soft {
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.3), 0 4px 16px -4px rgba(0, 0, 0, 0.2);
   }
   
   .dark button:not(:disabled):hover {

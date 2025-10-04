@@ -25,21 +25,36 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
   const [books, genres] = await Promise.all([booksPromise, genresPromise]);
 
   return (
-    <main className="container relative mx-auto py-10">
-      <BackButton />
+    <div className="min-h-screen bg-background">
+      <main className="container relative mx-auto py-12 px-4">
+        <BackButton />
 
-      <h1 className="text-3xl font-bold mb-8 text-center">Minha Biblioteca</h1>
-      
-      <Suspense fallback={<div className="text-center">Carregando livros...</div>}>
-        <BookList 
-          initialBooks={books} 
-          genres={genres}
-          currentFilters={{
-            search: params.search || '',
-            genre: params.genre || 'all'
-          }}
-        />
-      </Suspense>
-    </main>
+        {/* Header da página */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-foreground mb-4">Minha Biblioteca</h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Explore e organize sua coleção pessoal de livros. Use os filtros para encontrar exatamente o que procura.
+          </p>
+        </div>
+        
+        <Suspense fallback={
+          <div className="text-center py-16">
+            <div className="inline-flex items-center gap-2 text-muted-foreground">
+              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+              Carregando livros...
+            </div>
+          </div>
+        }>
+          <BookList 
+            initialBooks={books} 
+            genres={genres}
+            currentFilters={{
+              search: params.search || '',
+              genre: params.genre || 'all'
+            }}
+          />
+        </Suspense>
+      </main>
+    </div>
   );
 }

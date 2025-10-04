@@ -3,14 +3,7 @@
 import { Book } from "@/lib/types";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 interface BookCardProps {
@@ -19,95 +12,86 @@ interface BookCardProps {
 
 export function BookCard({ book }: BookCardProps) {
   const statusLabels = {
-    'QUERO_LER': 'Quero Ler',
-    'LENDO': 'Lendo',
-    'LIDO': 'Lido',
-    'PAUSADO': 'Pausado',
-    'ABANDONADO': 'Abandonado'
+    "QUERO_LER": "Quero Ler",
+    "LENDO": "Lendo",
+    "LIDO": "Lido",
+    "PAUSADO": "Pausado",
+    "ABANDONADO": "Abandonado"
   };
 
   const statusColors = {
-    'QUERO_LER': 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200 border border-blue-200 dark:border-blue-800',
-    'LENDO': 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200 border border-green-200 dark:border-green-800',
-    'LIDO': 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700',
-    'PAUSADO': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-800',
-    'ABANDONADO': 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200 border border-red-200 dark:border-red-800'
+    "QUERO_LER": "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300",
+    "LENDO": "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300",
+    "LIDO": "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300",
+    "PAUSADO": "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300",
+    "ABANDONADO": "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/20 dark:text-rose-300"
   };
 
   return (
-    <Card className="w-[320px] h-full flex flex-col hover:shadow-lg transition-shadow duration-200">
-      <CardHeader className="pb-3">
+    <Card className="group w-full max-w-sm h-full flex flex-col overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+      <CardHeader className="pb-4">
         <CardTitle>
-          <div className="text-lg line-clamp-2" title={book.title}>{book.title}</div>
+          <h3 className="text-lg font-semibold line-clamp-2 leading-tight group-hover:text-primary transition-colors" title={book.title}>
+            {book.title}
+          </h3>
         </CardTitle>
         <CardDescription>
-          <div className="line-clamp-1" title={book.author}>{book.author}</div>
+          <p className="line-clamp-1" title={book.author}>{book.author}</p>
         </CardDescription>
       </CardHeader>
       
-      <CardContent className="flex flex-col items-center flex-grow">
-        {/* Capa do livro */}
-        <div className="h-40 w-28 relative rounded-md overflow-hidden mb-4 flex-shrink-0">
-          {book.cover ? (
-            <Image
-              src={book.cover}
-              alt={`Capa de ${book.title}`}
-              fill
-              sizes="(max-width: 768px) 112px, 112px"
-              style={{ objectFit: "cover" }}
-              className="rounded-md"
-            />
-          ) : (
-            <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground rounded-md">
-              <div className="text-center">
-                <div className="text-2xl mb-1">📖</div>
-                <p className="text-xs">Sem capa</p>
+      <CardContent className="flex flex-col flex-grow space-y-4">
+        <div className="flex justify-center">
+          <div className="h-48 w-32 relative rounded-lg overflow-hidden shadow-md bg-muted">
+            {book.cover ? (
+              <Image
+                src={book.cover}
+                alt={`Capa de ${book.title}`}
+                fill
+                sizes="128px"
+                style={{ objectFit: "cover" }}
+                className="rounded-lg transition-transform duration-300 group-hover:scale-105"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
         
-        {/* Informações do livro */}
-        <div className="text-sm text-center space-y-2 flex-grow">
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            <div>
-              <span className="text-muted-foreground">Ano:</span>
-              <div className="font-medium">{book.year}</div>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Páginas:</span>
-              <div className="font-medium">{book.pages}</div>
-            </div>
-            <div className="col-span-2">
-              <span className="text-muted-foreground">Gênero:</span>
-              <div className="font-medium line-clamp-1" title={book.genre}>{book.genre}</div>
-            </div>
+        <div className="space-y-3 flex-grow text-center">
+          <div className="text-sm space-y-2">
+            <div className="text-muted-foreground">{book.year} • {book.pages} páginas</div>
+            <div className="text-muted-foreground line-clamp-1" title={book.genre}>{book.genre}</div>
           </div>
 
           {book.rating > 0 && (
-            <div className="flex items-center justify-center gap-1 text-yellow-500">
-              {"★".repeat(book.rating)}{"☆".repeat(5 - book.rating)}
-              <span className="text-muted-foreground ml-1">({book.rating})</span>
+            <div className="flex items-center justify-center gap-1">
+              {"★".repeat(Math.floor(book.rating))}{"☆".repeat(5 - Math.floor(book.rating))}
+              <span className="text-sm text-muted-foreground ml-2">({book.rating.toFixed(1)})</span>
             </div>
           )}
 
-          <div className="pt-2">
-            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusColors[book.status]}`}>
+          <div className="flex justify-center">
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${statusColors[book.status]}`}>
               {statusLabels[book.status]}
             </span>
           </div>
         </div>
       </CardContent>
       
-      <CardFooter className="flex justify-center gap-2 pt-2">
-        <Link href={`/library/${book.id}`}>
-          <Button variant="outline" className="text-xs px-3 py-1 font-medium">
+      <CardFooter className="flex gap-2 pt-4">
+        <Link href={`/library/${book.id}`} className="flex-1">
+          <Button variant="outline" className="w-full text-sm">
             Ver detalhes
           </Button>
         </Link>
         
-        <Link href={`/library/${book.id}/edit`}>
-          <Button className="text-xs px-3 py-1 font-medium">
+        <Link href={`/library/${book.id}/edit`} className="flex-1">
+          <Button className="w-full text-sm">
             Editar
           </Button>
         </Link>
