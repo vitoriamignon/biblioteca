@@ -112,7 +112,6 @@ export function BookList({ initialBooks, genres = [], currentFilters }: BookList
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
-              <SearchIcon />
               <Input
                 type="text"
                 placeholder="Buscar por título, autor, gênero ou sinopse..."

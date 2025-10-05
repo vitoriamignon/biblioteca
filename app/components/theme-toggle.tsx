@@ -94,33 +94,44 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
             className="fixed inset-0 z-40 bg-black/50 dark:bg-black/70"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 z-50 mt-2 w-44 rounded-lg border-2 border-border bg-background shadow-xl ring-1 ring-black/10 dark:ring-white/10">
-            <div className="p-2">
-              <button
-                onClick={() => {
-                  setTheme("light");
-                  setIsOpen(false);
-                }}
-                className={`
-                  flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium
-                  transition-all duration-200 hover:bg-accent hover:text-accent-foreground
-                  ${theme === "light" ? "bg-primary text-primary-foreground shadow-sm" : ""}
-                `}
-              >
-                <SunIcon />
-                <span>Modo Claro</span>
-              </button>
-              <button
-                onClick={() => {
-                  setTheme("dark");
-                  setIsOpen(false);
-                }}
-                className={`
-                  flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium
-                  transition-all duration-200 hover:bg-accent hover:text-accent-foreground
-                  ${theme === "dark" ? "bg-primary text-primary-foreground shadow-sm" : ""}
-                `}
-              >
+          <div className={`
+            absolute right-0 z-50 mt-2 w-44 rounded-lg border-2 shadow-xl
+            ${resolvedTheme === 'dark' 
+              ? 'bg-gray-900 border-gray-700' 
+              : 'bg-white border-gray-200'
+            }
+  `}>
+    <div className="p-2">
+      <button
+        onClick={() => {
+          setTheme("light");
+          setIsOpen(false);
+        }}
+        className={`
+          flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium
+          transition-all duration-200
+          ${theme === "light" 
+            ? "bg-blue-500 text-white shadow-sm" 
+            : resolvedTheme === "dark" 
+              ? "hover:bg-gray-800 text-gray-100" 
+              : "hover:bg-gray-100 text-gray-900"
+            }
+          `}
+                  >
+                    <SunIcon />
+                    <span>Modo Claro</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setTheme("dark");
+                      setIsOpen(false);
+                    }}
+                    className={`
+                      flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium
+                      transition-all duration-200 hover:bg-accent hover:text-accent-foreground
+                      ${theme === "dark" ? "bg-primary text-primary-foreground shadow-sm" : ""}
+                    `}
+                >
                 <MoonIcon />
                 <span>Modo Escuro</span>
               </button>

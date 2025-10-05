@@ -54,7 +54,7 @@ export async function createBook(formData: FormData) {
 // Server Action para atualizar um livro
 export async function updateBook(id: string, formData: FormData) {
   try {
-    const updateData: any = {}; // ⬅️ Mudar para any para flexibilidade
+    const updateData: Record<string, unknown> = {};
 
     // Campos existentes
     const title = formData.get('title') as string;

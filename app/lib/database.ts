@@ -6,7 +6,7 @@ import { BookStatus } from "@prisma/client";
 class PrismaBookDatabase {
   
   // Método simplificado de conversão
-  private convertPrismaBook(prismaBook: any): Book {
+   private convertPrismaBook(prismaBook: Book): Book {
     return {
       id: prismaBook.id,
       title: prismaBook.title,
@@ -63,7 +63,7 @@ class PrismaBookDatabase {
   // Atualizar livro - ATUALIZADO
   async updateBook(id: string, bookData: Partial<Book>): Promise<Book | null> {
     try {
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       
       // Mapear campos simples
       if (bookData.title !== undefined) updateData.title = bookData.title;
