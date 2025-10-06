@@ -67,6 +67,21 @@ export function BookCard({ book }: BookCardProps) {
             <div className="text-muted-foreground">{book.year} • {book.pages} páginas</div>
             <div className="text-muted-foreground line-clamp-1" title={book.genre}>{book.genre}</div>
           </div>
+          {/* Calcular progresso de leitura */}
+                {book.status === 'LENDO' && book.currentPage && book.currentPage > 0 && (() => {
+                  const readingProgress = book.currentPage && book.pages 
+                    ? Math.round((book.currentPage / book.pages) * 100)
+                    : 0;
+                  
+                  return (
+                    <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                      <div 
+                        className="bg-green-600 h-2 rounded-full transition-all duration-300" 
+                        style={{ width: `${readingProgress}%` }}
+                      ></div>
+                    </div>
+                  );
+                })()}
 
           {book.rating > 0 && (
             <div className="flex items-center justify-center gap-1">
@@ -79,6 +94,20 @@ export function BookCard({ book }: BookCardProps) {
             <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${statusColors[book.status]}`}>
               {statusLabels[book.status]}
             </span>
+            
+                 {/* Indicadores de informações extras */}
+      <div className="flex justify-center gap-1 text-[10px]">
+        {book.isbn && book.isbn.trim().length > 0 && (
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200 rounded-full border border-purple-200 dark:border-purple-800">
+            📄 ISBN
+          </span>
+        )}
+        {book.notes && book.notes.trim().length > 0 && (
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200 rounded-full border border-orange-200 dark:border-orange-800">
+            📝 Notas
+          </span>
+        )}
+      </div>
           </div>
         </div>
       </CardContent>
@@ -98,4 +127,4 @@ export function BookCard({ book }: BookCardProps) {
       </CardFooter>
     </Card>
   );
-}
+} 

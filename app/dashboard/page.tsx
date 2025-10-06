@@ -1,8 +1,8 @@
+// dashboard/page.tsx - USE ESTA VERSÃO (A ORIGINAL)
 import { getStats } from "@/lib/actions";
 import Link from "next/link";
 import { Navigation } from "@/components/navigation";
 
-// Ícones SVG
 const BookIcon = () => (
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -45,10 +45,14 @@ const StarIcon = () => (
     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
   </svg>
 );
-
 export default async function DashboardPage() {
   // Buscar dados no servidor
   const stats = await getStats();
+
+  // Calcular porcentagens
+  const readPercentage = stats.total > 0 ? Math.round((stats.read / stats.total) * 100) : 0;
+  const readingPercentage = stats.total > 0 ? Math.round((stats.reading / stats.total) * 100) : 0;
+  const wantToReadPercentage = stats.total > 0 ? Math.round((stats.wantToRead / stats.total) * 100) : 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,7 +84,7 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Estatísticas principais */}
+        {/* Estatísticas principais - USE stats DIRETAMENTE */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"> 
             <div className="flex items-center justify-between mb-4">
@@ -130,8 +134,7 @@ export default async function DashboardPage() {
             </div>
           </div>
         </div>
-
-        {/* Estatísticas secundárias */}
+       {/* Estatísticas secundárias */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200">
             <div className="flex items-center gap-4">
@@ -169,6 +172,11 @@ export default async function DashboardPage() {
                 <div className="text-sm text-muted-foreground">Avaliação média</div>
               </div>
             </div>
+            {stats.averageRating > 0 && (
+              <div className="text-xs text-muted-foreground mt-1">
+                {stats.read > 0 ? `${stats.read} livros avaliados` : 'Sem avaliações'}
+              </div>
+            )}
           </div>
         </div>
 

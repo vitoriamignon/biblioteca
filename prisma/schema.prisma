@@ -1,30 +1,38 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+import { createClient } from '@libsql/client';
 
-generator client {
-  provider = "prisma-client-js"
-}
+const client = createClient({
+  url: process.env.DATABASE_URL,
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
 
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
+export default client;
 
 model Book {
-  id        String   @id @default(cuid())
-  title     String
-  author    String
-  genre     String
-  year      Int
-  pages     Int
-  rating    Float
-  synopsis  String
-  cover     String
-  status    BookStatus
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String     @id @default(cuid())
+  title       String
+  author      String
+  genre       String?
+  year        Int
+  pages       Int
+  rating      Float
+  synopsis    String
+  cover       String?
+  status      BookStatus @default(QUERO_LER)
+  currentPage Int        @default(0)
+  isbn        String?
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   @@map("books")
+}
+
+model Genre {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("genres")
 }
 
 enum BookStatus {

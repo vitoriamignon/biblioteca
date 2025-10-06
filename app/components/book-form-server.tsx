@@ -144,6 +144,36 @@ export function BookForm({ initial = {}, isEditing = false, bookId, onCancel }: 
                 </select>
               </div>
 
+              {/* ⬇️ NOVOS CAMPOS ADICIONADOS AQUI ⬇️ */}
+              <div>
+                <label htmlFor="currentPage" className="block text-sm font-medium text-foreground mb-1">
+                  Página Atual
+                </label>
+                <Input
+                  id="currentPage"
+                  name="currentPage"
+                  type="number"
+                  min="0"
+                  defaultValue={initial.currentPage ?? 0}
+                  placeholder="0"
+                  disabled={isPending}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="isbn" className="block text-sm font-medium text-foreground mb-1">
+                  ISBN (Opcional)
+                </label>
+                <Input
+                  id="isbn"
+                  name="isbn"
+                  type="text"
+                  defaultValue={initial.isbn ?? ""}
+                  placeholder="978-85-123-4567-8"
+                  disabled={isPending}
+                />
+              </div>
+
               <div>
                 <label htmlFor="year" className="block text-sm font-medium text-foreground mb-1">
                   Ano de Publicação *
@@ -206,6 +236,22 @@ export function BookForm({ initial = {}, isEditing = false, bookId, onCancel }: 
                   disabled={isPending}
                 />
               </div>
+            </div>
+
+            {/* ⬇️ CAMPO DE NOTAS ADICIONADO AQUI ⬇️ */}
+            <div>
+              <label htmlFor="notes" className="block text-sm font-medium text-foreground mb-1">
+                Anotações Pessoais
+              </label>
+              <textarea
+                id="notes"
+                name="notes"
+                rows={4}
+                defaultValue={initial.notes ?? ""}
+                placeholder="Suas anotações sobre o livro, personagens favoritos, citações, etc..."
+                disabled={isPending}
+                className="w-full border border-border rounded px-3 py-2 bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-transparent resize-vertical"
+              />
             </div>
 
             <div>

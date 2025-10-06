@@ -1,117 +1,122 @@
-// app/lib/database.ts
+// app/lib/database.ts - CONVERTIDO PARA TURSO
+import { getStats } from "@/lib/actions"
 import { Book } from "./types";
-import { prisma } from "./prisma";
-import { BookStatus } from "@prisma/client";
+import { getTursoClient } from "./turso";
 
-// Implementação real usando Prisma + SQLite
-class PrismaBookDatabase {
+class TursoBookDatabase {
   
-  // Converter enum do Prisma para string
-  private convertBookStatus(status: BookStatus): Book['status'] {
-    return status as Book['status'];
-  }
-
-  // Converter string para enum do Prisma
-  private convertToBookStatus(status: Book['status']): BookStatus {
-    return status as BookStatus;
-  }
-
-  // Converter Book do Prisma para Book da aplicação
-  private convertPrismaBook(prismaBook: {
-    id: string;
-    title: string;
-    author: string;
-    genre: string;
-    year: number;
-    pages: number;
-    rating: number;
-    synopsis: string;
-    cover: string;
-    status: BookStatus;
-    createdAt: Date;
-    updatedAt: Date;
-  }): Book {
+  // Método de conversão do Turso para Book
+  private convertTursoBook(tursoBook: any): Book {
     return {
-      id: prismaBook.id,
-      title: prismaBook.title,
-      author: prismaBook.author,
-      genre: prismaBook.genre,
-      year: prismaBook.year,
-      pages: prismaBook.pages,
-      rating: prismaBook.rating,
-      synopsis: prismaBook.synopsis,
-      cover: prismaBook.cover,
-      status: this.convertBookStatus(prismaBook.status),
-      createdAt: prismaBook.createdAt,
-      updatedAt: prismaBook.updatedAt,
+      id: tursoBook.id as string,
+      title: tursoBook.title as string,
+      author: tursoBook.author as string,
+      genre: tursoBook.genre as string || 'Sem gênero',
+      year: tursoBook.year as number,
+      pages: tursoBook.pages as number,
+      rating: tursoBook.rating as number,
+      synopsis: tursoBook.synopsis as string,
+      cover: tursoBook.cover as string || '',
+      status: tursoBook.status as Book['status'],
+      currentPage: tursoBook.currentPage as number || 0,
+      isbn: tursoBook.isbn as string || '',
+      notes: tursoBook.notes as string || '',
+      createdAt: tursoBook.createdAt as string,
+      updatedAt: tursoBook.updatedAt as string,
     };
   }
 
   // Obter todos os livros
   async getAllBooks(): Promise<Book[]> {
-    const books = await prisma.book.findMany({
-      orderBy: { createdAt: 'desc' }
-    });
-    return books.map(book => this.convertPrismaBook(book));
+    const client = getTursoClient();
+    if (!client) return [];
+    
+    const result = await client.execute('SELECT * FROM Book ORDER BY createdAt DESC');
+    return result.rows.map(row => this.convertTursoBook(row));
   }
 
   // Obter livro por ID
   async getBookById(id: string): Promise<Book | null> {
-    const book = await prisma.book.findUnique({
-      where: { id }
+    const client = getTursoClient();
+    if (!client) return null;
+    
+    const result = await client.execute({
+      sql: 'SELECT * FROM Book WHERE id = ?',
+      args: [id]
     });
-    return book ? this.convertPrismaBook(book) : null;
+    
+    return result.rows.length > 0 ? this.convertTursoBook(result.rows[0]) : null;
   }
 
   // Criar novo livro
   async createBook(bookData: Omit<Book, 'id' | 'createdAt' | 'updatedAt'>): Promise<Book> {
-    const newBook = await prisma.book.create({
-      data: {
-        title: bookData.title,
-        author: bookData.author,
-        genre: bookData.genre,
-        year: bookData.year,
-        pages: bookData.pages,
-        rating: bookData.rating,
-        synopsis: bookData.synopsis,
-        cover: bookData.cover,
-        status: this.convertToBookStatus(bookData.status),
-      }
+    const client = getTursoClient();
+    if (!client) throw new Error('Database not available');
+    
+    const id = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    const now = new Date().toISOString();
+    
+    await client.execute({
+      sql: `INSERT INTO Book (
+        id, title, author, genre, year, pages, rating, synopsis, 
+        cover, status, currentPage, isbn, notes, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [
+        id,
+        bookData.title,
+        bookData.author,
+        bookData.genre || '',
+        bookData.year,
+        bookData.pages,
+        bookData.rating,
+        bookData.synopsis,
+        bookData.cover || '',
+        bookData.status,
+        bookData.currentPage || 0,
+        bookData.isbn || '',
+        bookData.notes || '',
+        now,
+        now
+      ]
     });
-    return this.convertPrismaBook(newBook);
+    
+    return {
+      id,
+      ...bookData,
+      createdAt: now,
+      updatedAt: now
+    };
   }
 
   // Atualizar livro
   async updateBook(id: string, bookData: Partial<Book>): Promise<Book | null> {
+    const client = getTursoClient();
+    if (!client) return null;
+    
     try {
-      const updateData: {
-        title?: string;
-        author?: string;
-        genre?: string;
-        year?: number;
-        pages?: number;
-        rating?: number;
-        synopsis?: string;
-        cover?: string;
-        status?: BookStatus;
-      } = {};
+      const updates: string[] = [];
+      const args: any[] = [];
       
-      if (bookData.title !== undefined) updateData.title = bookData.title;
-      if (bookData.author !== undefined) updateData.author = bookData.author;
-      if (bookData.genre !== undefined) updateData.genre = bookData.genre;
-      if (bookData.year !== undefined) updateData.year = bookData.year;
-      if (bookData.pages !== undefined) updateData.pages = bookData.pages;
-      if (bookData.rating !== undefined) updateData.rating = bookData.rating;
-      if (bookData.synopsis !== undefined) updateData.synopsis = bookData.synopsis;
-      if (bookData.cover !== undefined) updateData.cover = bookData.cover;
-      if (bookData.status !== undefined) updateData.status = this.convertToBookStatus(bookData.status);
-
-      const updatedBook = await prisma.book.update({
-        where: { id },
-        data: updateData
+      // Construir query dinamicamente
+      Object.entries(bookData).forEach(([key, value]) => {
+        if (key !== 'id' && value !== undefined) {
+          updates.push(`${key} = ?`);
+          args.push(value);
+        }
       });
       
-      return this.convertPrismaBook(updatedBook);
+      if (updates.length === 0) return null;
+      
+      updates.push('updatedAt = ?');
+      args.push(new Date().toISOString());
+      args.push(id); // WHERE id = ?
+      
+      await client.execute({
+        sql: `UPDATE Book SET ${updates.join(', ')} WHERE id = ?`,
+        args
+      });
+      
+      return this.getBookById(id);
     } catch (error) {
       console.error('Error updating book:', error);
       return null;
@@ -120,9 +125,13 @@ class PrismaBookDatabase {
 
   // Excluir livro
   async deleteBook(id: string): Promise<boolean> {
+    const client = getTursoClient();
+    if (!client) return false;
+    
     try {
-      await prisma.book.delete({
-        where: { id }
+      await client.execute({
+        sql: 'DELETE FROM Book WHERE id = ?',
+        args: [id]
       });
       return true;
     } catch (error) {
@@ -133,51 +142,63 @@ class PrismaBookDatabase {
 
   // Buscar livros por termo
   async searchBooks(searchTerm: string): Promise<Book[]> {
-    const books = await prisma.book.findMany({
-      where: {
-        OR: [
-          { title: { contains: searchTerm } },
-          { author: { contains: searchTerm } },
-          { genre: { contains: searchTerm } },
-          { synopsis: { contains: searchTerm } },
-        ]
-      },
-      orderBy: { createdAt: 'desc' }
+    const client = getTursoClient();
+    if (!client) return [];
+    
+    const result = await client.execute({
+      sql: `SELECT * FROM Book 
+            WHERE title LIKE ? OR author LIKE ? OR synopsis LIKE ? OR genre LIKE ?
+            ORDER BY createdAt DESC`,
+      args: [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`]
     });
-    return books.map(book => this.convertPrismaBook(book));
+    
+    return result.rows.map(row => this.convertTursoBook(row));
   }
 
   // Obter livros por gênero
   async getBooksByGenre(genre: string): Promise<Book[]> {
-    const books = await prisma.book.findMany({
-      where: { genre },
-      orderBy: { createdAt: 'desc' }
+    const client = getTursoClient();
+    if (!client) return [];
+    
+    const result = await client.execute({
+      sql: 'SELECT * FROM Book WHERE genre = ? ORDER BY createdAt DESC',
+      args: [genre]
     });
-    return books.map(book => this.convertPrismaBook(book));
+    
+    return result.rows.map(row => this.convertTursoBook(row));
   }
 
   // Obter livros por status
   async getBooksByStatus(status: Book['status']): Promise<Book[]> {
-    const books = await prisma.book.findMany({
-      where: { status: this.convertToBookStatus(status) },
-      orderBy: { createdAt: 'desc' }
+    const client = getTursoClient();
+    if (!client) return [];
+    
+    const result = await client.execute({
+      sql: 'SELECT * FROM Book WHERE status = ? ORDER BY createdAt DESC',
+      args: [status]
     });
-    return books.map(book => this.convertPrismaBook(book));
-  }
-
-  // Obter gêneros únicos (alias para compatibilidade)
-  async getUniqueGenres(): Promise<string[]> {
-    return this.getAllGenres();
+    
+    return result.rows.map(row => this.convertTursoBook(row));
   }
 
   // Obter gêneros únicos
   async getAllGenres(): Promise<string[]> {
-    const result = await prisma.book.findMany({
-      select: { genre: true },
-      distinct: ['genre'],
-      orderBy: { genre: 'asc' }
-    });
-    return result.map(item => item.genre);
+    const client = getTursoClient();
+    if (!client) return [];
+    
+    const result = await client.execute(`
+      SELECT DISTINCT genre 
+      FROM Book 
+      WHERE genre IS NOT NULL AND genre != '' 
+      ORDER BY genre
+    `);
+    
+    return result.rows.map(row => row.genre as string);
+  }
+
+  // Para compatibilidade
+  async getUniqueGenres(): Promise<string[]> {
+    return this.getAllGenres();
   }
 
   // Obter estatísticas
@@ -191,33 +212,57 @@ class PrismaBookDatabase {
     totalPages: number;
     averageRating: number;
   }> {
-    const [total, reading, read, wantToRead, paused, dropped, pagesResult, ratingResult] = await Promise.all([
-      prisma.book.count(),
-      prisma.book.count({ where: { status: 'LENDO' } }),
-      prisma.book.count({ where: { status: 'LIDO' } }),
-      prisma.book.count({ where: { status: 'QUERO_LER' } }),
-      prisma.book.count({ where: { status: 'PAUSADO' } }),
-      prisma.book.count({ where: { status: 'ABANDONADO' } }),
-      prisma.book.aggregate({
-        where: { status: 'LIDO' },
-        _sum: { pages: true }
-      }),
-      prisma.book.aggregate({
-        _avg: { rating: true }
-      })
-    ]);
-
-    return {
-      total,
-      reading,
-      read,
-      wantToRead,
-      paused,
-      dropped,
-      totalPages: pagesResult._sum.pages || 0,
-      averageRating: ratingResult._avg.rating || 0,
-    };
+    const client = getTursoClient();
+    if (!client) {
+      return {
+        total: 0,
+        reading: 0,
+        read: 0,
+        wantToRead: 0,
+        paused: 0,
+        dropped: 0,
+        totalPages: 0,
+        averageRating: 0,
+      };
+    }
+    
+    try {
+      const [totalResult, statusResult, pagesResult, ratingResult] = await Promise.all([
+        client.execute('SELECT COUNT(*) as total FROM Book'),
+        client.execute('SELECT status, COUNT(*) as count FROM Book GROUP BY status'),
+        client.execute('SELECT SUM(pages) as total FROM Book WHERE status = "LIDO"'),
+        client.execute('SELECT AVG(rating) as average FROM Book WHERE rating > 0')
+      ]);
+      
+      const statusCounts: Record<string, number> = {};
+      statusResult.rows.forEach(row => {
+        statusCounts[row.status as string] = row.count as number;
+      });
+      
+      return {
+        total: totalResult.rows[0].total as number,
+        reading: statusCounts['LENDO'] || 0,
+        read: statusCounts['LIDO'] || 0,
+        wantToRead: statusCounts['QUERO_LER'] || 0,
+        paused: statusCounts['PAUSADO'] || 0,
+        dropped: statusCounts['ABANDONADO'] || 0,
+        totalPages: pagesResult.rows[0].total as number || 0,
+        averageRating: ratingResult.rows[0].average as number || 0,
+      };
+    } catch (error) {
+      console.error('Error getting stats:', error);
+      return {
+        total: 0,
+        reading: 0,
+        read: 0,
+        wantToRead: 0,
+        paused: 0,
+        dropped: 0,
+        totalPages: 0,
+        averageRating: 0,
+      };
+    }
   }
 }
 
-export const bookDatabase = new PrismaBookDatabase();
+export const bookDatabase = new TursoBookDatabase();

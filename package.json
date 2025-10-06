@@ -4,21 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "postinstall": "prisma generate",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy",
-    "db:seed": "tsx scripts/seed.ts",
-    "db:studio": "prisma studio",
-    "db:reset": "prisma migrate reset && npm run db:seed"
+    "lint": "eslint"
   },
   "dependencies": {
-    "@prisma/client": "^6.16.2",
+    "@libsql/client": "^0.15.15",
     "next": "15.5.3",
-    "prisma": "^6.16.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "styled-components": "^6.1.19",
@@ -27,13 +19,17 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^20.19.19",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.3",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
