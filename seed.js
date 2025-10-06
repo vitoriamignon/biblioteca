@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client'
+//import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
+//const prisma = new PrismaClient()
 
 const sampleBooks = [
   {
@@ -64,7 +64,7 @@ async function main() {
   console.log('🌱 Adicionando livros de exemplo...')
   
   // Limpar dados existentes
-  await prisma.book.deleteMany()
+//  await prisma.book.deleteMany()
   console.log('🗑️ Dados antigos removidos')
   
   // Inserir livros de exemplo

@@ -51,7 +51,7 @@
     "**/*.tsx",
     "next-env.d.ts",
     ".next/types/**/*.ts"
-, "scripts/migrate-data.js"  ],
+, "scripts/migrate-data.js", "app/lib/prisma.old"  ],
   "exclude": [
     "node_modules"
   ]

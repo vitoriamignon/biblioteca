@@ -1,8 +1,8 @@
+// dashboard/page.tsx - USE ESTA VERSÃO (A ORIGINAL)
 import { getStats } from "@/lib/actions";
 import Link from "next/link";
 import { Navigation } from "@/components/navigation";
 
-// Ícones SVG (mantenha os mesmos)
 const BookIcon = () => (
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -45,28 +45,14 @@ const StarIcon = () => (
     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
   </svg>
 );
-
 export default async function DashboardPage() {
   // Buscar dados no servidor
   const stats = await getStats();
 
-  // Mapear para a estrutura esperada pelo componente
-  const mappedStats = {
-    total: stats.totalBooks,
-    reading: stats.booksByStatus.LENDO,
-    read: stats.booksByStatus.LIDO,
-    wantToRead: stats.booksByStatus.QUERO_LER,
-    paused: stats.booksByStatus.PAUSADO,
-    abandoned: stats.booksByStatus.ABANDONADO,
-    totalPages: stats.totalPages,
-    averageRating: 4.5, // Valor padrão ou você pode calcular
-    favoriteGenre: stats.favoriteGenre
-  };
-
   // Calcular porcentagens
-  const readPercentage = mappedStats.total > 0 ? Math.round((mappedStats.read / mappedStats.total) * 100) : 0;
-  const readingPercentage = mappedStats.total > 0 ? Math.round((mappedStats.reading / mappedStats.total) * 100) : 0;
-  const wantToReadPercentage = mappedStats.total > 0 ? Math.round((mappedStats.wantToRead / mappedStats.total) * 100) : 0;
+  const readPercentage = stats.total > 0 ? Math.round((stats.read / stats.total) * 100) : 0;
+  const readingPercentage = stats.total > 0 ? Math.round((stats.reading / stats.total) * 100) : 0;
+  const wantToReadPercentage = stats.total > 0 ? Math.round((stats.wantToRead / stats.total) * 100) : 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -98,7 +84,7 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Estatísticas principais */}
+        {/* Estatísticas principais - USE stats DIRETAMENTE */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"> 
             <div className="flex items-center justify-between mb-4">
@@ -106,7 +92,7 @@ export default async function DashboardPage() {
                 <BookIcon />
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-card-foreground">{mappedStats.total}</div>
+                <div className="text-2xl font-bold text-card-foreground">{stats.total}</div>
                 <div className="text-sm text-muted-foreground">Total de livros</div>
               </div>
             </div>
@@ -118,7 +104,7 @@ export default async function DashboardPage() {
                 <ReadingIcon />
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-card-foreground">{mappedStats.reading}</div>
+                <div className="text-2xl font-bold text-card-foreground">{stats.reading}</div>
                 <div className="text-sm text-muted-foreground">Lendo agora</div>
               </div>
             </div>
@@ -130,7 +116,7 @@ export default async function DashboardPage() {
                 <CheckIcon />
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-card-foreground">{mappedStats.read}</div>
+                <div className="text-2xl font-bold text-card-foreground">{stats.read}</div>
                 <div className="text-sm text-muted-foreground">Lidos</div>
               </div>
             </div>
@@ -142,14 +128,13 @@ export default async function DashboardPage() {
                 <PagesIcon />
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-card-foreground">{mappedStats.totalPages.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-card-foreground">{stats.totalPages.toLocaleString()}</div>
                 <div className="text-sm text-muted-foreground">Páginas lidas</div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Estatísticas secundárias */}
+       {/* Estatísticas secundárias */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200">
             <div className="flex items-center gap-4">
@@ -157,7 +142,7 @@ export default async function DashboardPage() {
                 <HeartIcon />
               </div>
               <div>
-                <div className="text-2xl font-bold text-card-foreground">{mappedStats.wantToRead}</div>
+                <div className="text-2xl font-bold text-card-foreground">{stats.wantToRead}</div>
                 <div className="text-sm text-muted-foreground">Quero ler</div>
               </div>
             </div>
@@ -169,7 +154,7 @@ export default async function DashboardPage() {
                 <PauseIcon />
               </div>
               <div>
-                <div className="text-2xl font-bold text-card-foreground">{mappedStats.paused}</div>
+                <div className="text-2xl font-bold text-card-foreground">{stats.paused}</div>
                 <div className="text-sm text-muted-foreground">Pausados</div>
               </div>
             </div>
@@ -182,14 +167,14 @@ export default async function DashboardPage() {
               </div>
               <div>
                 <div className="text-2xl font-bold text-card-foreground">
-                  {mappedStats.averageRating > 0 ? mappedStats.averageRating.toFixed(1) : '--'}
+                  {stats.averageRating > 0 ? stats.averageRating.toFixed(1) : '--'}
                 </div>
                 <div className="text-sm text-muted-foreground">Avaliação média</div>
               </div>
             </div>
-            {mappedStats.averageRating > 0 && (
+            {stats.averageRating > 0 && (
               <div className="text-xs text-muted-foreground mt-1">
-                {mappedStats.read > 0 ? `${mappedStats.read} livros avaliados` : 'Sem avaliações'}
+                {stats.read > 0 ? `${stats.read} livros avaliados` : 'Sem avaliações'}
               </div>
             )}
           </div>
@@ -209,19 +194,19 @@ export default async function DashboardPage() {
             </div>
           </div>
           
-          {mappedStats.total > 0 ? (
+          {stats.total > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <h3 className="font-semibold text-foreground">Progresso de Leitura</h3>
                 <div className="space-y-1">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Livros lidos</span>
-                    <span className="font-medium">{readPercentage}%</span>
+                    <span className="font-medium">{Math.round((stats.read / stats.total) * 100)}%</span>
                   </div>
                   <div className="w-full bg-muted rounded-full h-2">
                     <div 
                       className="bg-gradient-to-r from-primary to-purple-500 h-2 rounded-full transition-all duration-500" 
-                      style={{ width: `${readPercentage}%` }}
+                      style={{ width: `${Math.round((stats.read / stats.total) * 100)}%` }}
                     ></div>
                   </div>
                 </div>
@@ -231,11 +216,11 @@ export default async function DashboardPage() {
                 <h3 className="font-semibold text-foreground">Estatísticas Rápidas</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="text-center p-2 bg-background/50 rounded-lg">
-                    <div className="font-bold text-lg text-foreground">{mappedStats.total}</div>
+                    <div className="font-bold text-lg text-foreground">{stats.total}</div>
                     <div className="text-muted-foreground">Total</div>
                   </div>
                   <div className="text-center p-2 bg-background/50 rounded-lg">
-                    <div className="font-bold text-lg text-foreground">{mappedStats.reading}</div>
+                    <div className="font-bold text-lg text-foreground">{stats.reading}</div>
                     <div className="text-muted-foreground">Lendo</div>
                   </div>
                 </div>

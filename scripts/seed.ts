@@ -1,6 +1,6 @@
 // scripts/seed.ts
-import { PrismaClient } from '@prisma/client'
-import { initialBooks } from '../app/lib/data'
+//import { PrismaClient } from '@prisma/client'
+//import { initialBooks } from '../app/lib/data'
 
 const prisma = new PrismaClient()
 

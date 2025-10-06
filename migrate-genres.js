@@ -1,6 +1,6 @@
 // migrate-genres.js
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+//const { PrismaClient } = require('@prisma/client');
+//const prisma = new PrismaClient();
 
 // Extrair gêneros únicos dos seus livros
 const uniqueGenres = [
