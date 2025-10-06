@@ -1,18 +1,20 @@
-// app/lib/types.ts
-export type Book = {
+export type BookStatus = 'QUERO_LER' | 'LENDO' | 'LIDO' | 'PAUSADO' | 'ABANDONADO';
+
+export interface Book {
   id: string;
   title: string;
   author: string;
-  genre: string;
+  genre: string; // Nome do gênero (vem da relação)
   year: number;
   pages: number;
-  rating: number; // 1-5 estrelas
+  rating: number;
   synopsis: string;
   cover: string | null;
-  status: 'QUERO_LER' | 'LENDO' | 'LIDO' | 'PAUSADO' | 'ABANDONADO';
-  createdAt?: Date;
-  updatedAt?: Date;
-  currentPage?: number;
-  isbn?: string | null;
-  notes?: string | null;
-};
+  status: BookStatus;
+  currentPage: number;
+  isbn: string | null;
+  notes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  genreId?: string | null; // ID da relação (opcional)
+}

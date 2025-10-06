@@ -83,7 +83,22 @@ yarn install
 pnpm install
 ```
 
-3. **Execute em modo desenvolvimento:**
+3. **Configure o Banco de Dados:**
+```bash
+# 1. Gerar cliente Prisma
+npx prisma generate
+
+# 2. Criar banco e tabelas
+npx prisma migrate dev --name init
+
+# 3. Migrar livros para o banco
+node migrate-books.js
+
+# 4. Migrar gêneros para o banco
+node migrate-genres.js
+```
+
+4. **Execute em modo desenvolvimento:**
 ```bash
 npm run dev
 # ou
@@ -92,7 +107,7 @@ yarn dev
 pnpm dev
 ```
 
-4. **Abra o navegador:**
+5. **Abra o navegador:**
 ```
 http://localhost:3000
 ```
@@ -100,8 +115,17 @@ http://localhost:3000
 ### Build para produção
 
 ```bash
+# Desenvolvimento
+npm run dev
+
+# Build produção
 npm run build
-npm run start
+
+# Banco de dados
+npx prisma studio          # Visualizar dados
+npx prisma generate        # Atualizar cliente
+npx prisma migrate dev     # Nova migração
+
 ```
 
 ## 🚀 Deploy

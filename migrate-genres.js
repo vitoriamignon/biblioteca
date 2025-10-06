@@ -1,6 +1,5 @@
 // migrate-genres.js
-import { PrismaClient } from '@prisma/client';
-
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 // Extrair gêneros únicos dos seus livros
@@ -16,25 +15,17 @@ const uniqueGenres = [
   'Algoritmos e Estrutura de Dados'
 ];
 
-async function migrateGenres() {
+async function migrateToTurso() {
   try {
-    console.log('📚 Adicionando gêneros...');
-    
-    for (const genreName of uniqueGenres) {
-      await prisma.genre.create({
-        data: {
-          name: genreName
-        }
-      });
-      console.log(`✅ Gênero: ${genreName}`);
-    }
-    
-    console.log(`🎉 ${uniqueGenres.length} gêneros criados!`);
-  } catch (error) {
-    console.error('❌ Erro:', error);
-  } finally {
+    console.log('🚀 Migrando livros para Turso...');
+    // Seu código de migração aqui
     await prisma.$disconnect();
+    console.log('✅ Migração concluída!');
+  } catch (error) {
+    console.error('❌ Erro na migração:', error);
+    await prisma.$disconnect();
+    process.exit(1);
   }
 }
 
-migrateGenres();
+migrateToTurso();

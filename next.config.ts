@@ -13,6 +13,12 @@ const nextConfig = {
       // outros domínios
     ],
   },
+   typescript: {
+    ignoreBuildErrors: false, // Mantenha false para ver erros
+  },
+  eslint: {
+    ignoreDuringBuilds: false, // Mantenha false para ver erros
+  },
 };
 
 module.exports = nextConfig;

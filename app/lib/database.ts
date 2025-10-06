@@ -5,21 +5,25 @@ import { BookStatus } from "@prisma/client";
 
 class PrismaBookDatabase {
   
-  // Método simplificado de conversão
-   private convertPrismaBook(prismaBook: Book): Book {
+  // Método simplificado de conversão - CORRIGIDO
+  private convertPrismaBook(prismaBook: any): Book {
     return {
       id: prismaBook.id,
       title: prismaBook.title,
       author: prismaBook.author,
-      genre: prismaBook.genre,
+      genre: prismaBook.genre || 'Sem gênero', // ⬅️ Usar genre direto
       year: prismaBook.year,
       pages: prismaBook.pages,
       rating: prismaBook.rating,
       synopsis: prismaBook.synopsis,
-      cover: prismaBook.cover || '', // ⬅️ Garante que seja string
-      status: prismaBook.status as Book['status'],
+      cover: prismaBook.cover || '',
+      status: prismaBook.status,
+      currentPage: prismaBook.currentPage || 0,
+      isbn: prismaBook.isbn || null,
+      notes: prismaBook.notes || null,
       createdAt: prismaBook.createdAt,
       updatedAt: prismaBook.updatedAt,
+      // ⬅️ REMOVER genreId completamente
     };
   }
 
@@ -39,28 +43,30 @@ class PrismaBookDatabase {
     return book ? this.convertPrismaBook(book) : null;
   }
 
-  // Criar novo livro - ATUALIZADO
+  // Criar novo livro - CORRIGIDO (SEM genreRef)
   async createBook(bookData: Omit<Book, 'id' | 'createdAt' | 'updatedAt'>): Promise<Book> {
     const newBook = await prisma.book.create({
       data: {
         title: bookData.title,
         author: bookData.author,
-        genre: bookData.genre,
+        genre: bookData.genre, // ⬅️ Usar genre direto
         year: bookData.year,
         pages: bookData.pages,
         rating: bookData.rating,
         synopsis: bookData.synopsis,
         cover: bookData.cover,
         status: bookData.status as BookStatus,
-        currentPage: 0, // Valor padrão
-        isbn: '', // Valor padrão
-        notes: '', // Valor padrão
+        currentPage: bookData.currentPage || 0,
+        isbn: bookData.isbn || '',
+        notes: bookData.notes || '',
+        // ⬅️ REMOVER genreId completamente
       }
+      // ⬅️ REMOVER include genreRef
     });
     return this.convertPrismaBook(newBook);
   }
 
-  // Atualizar livro - ATUALIZADO
+  // Atualizar livro - CORRIGIDO
   async updateBook(id: string, bookData: Partial<Book>): Promise<Book | null> {
     try {
       const updateData: Record<string, unknown> = {};
@@ -75,6 +81,9 @@ class PrismaBookDatabase {
       if (bookData.synopsis !== undefined) updateData.synopsis = bookData.synopsis;
       if (bookData.cover !== undefined) updateData.cover = bookData.cover;
       if (bookData.status !== undefined) updateData.status = bookData.status;
+      if (bookData.currentPage !== undefined) updateData.currentPage = bookData.currentPage;
+      if (bookData.isbn !== undefined) updateData.isbn = bookData.isbn;
+      if (bookData.notes !== undefined) updateData.notes = bookData.notes;
 
       const updatedBook = await prisma.book.update({
         where: { id },
@@ -101,26 +110,28 @@ class PrismaBookDatabase {
     }
   }
 
-  // Buscar livros por termo
- async searchBooks(searchTerm: string): Promise<Book[]> {
-  const books = await prisma.book.findMany({
-    where: {
-      OR: [
-        { title: { contains: searchTerm } },     // ✅ SEM mode
-        { author: { contains: searchTerm } },    // ✅ SEM mode  
-        { genre: { contains: searchTerm } },     // ✅ SEM mode
-        { synopsis: { contains: searchTerm } },  // ✅ SEM mode
-      ]
-    },
-    orderBy: { createdAt: 'desc' }
-  });
-  return books.map(book => this.convertPrismaBook(book));
-}
+  // Buscar livros por termo - CORRIGIDO (SEM genreRef)
+  async searchBooks(searchTerm: string): Promise<Book[]> {
+    const books = await prisma.book.findMany({
+      where: {
+        OR: [
+          { title: { contains: searchTerm } },
+          { author: { contains: searchTerm } },
+          { synopsis: { contains: searchTerm } },
+          { genre: { contains: searchTerm } } // ⬅️ Buscar por genre direto
+        ]
+      },
+      // ⬅️ REMOVER include genreRef
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    return books.map(book => this.convertPrismaBook(book));
+  }
 
-  // Obter livros por gênero
+  // Obter livros por gênero - CORRIGIDO (SEM genreRef)
   async getBooksByGenre(genre: string): Promise<Book[]> {
     const books = await prisma.book.findMany({
-      where: { genre },
+      where: { genre }, // ⬅️ Usar genre direto
       orderBy: { createdAt: 'desc' }
     });
     return books.map(book => this.convertPrismaBook(book));
@@ -139,12 +150,11 @@ class PrismaBookDatabase {
   async getAllGenres(): Promise<string[]> {
     const books = await prisma.book.findMany({
       select: { genre: true },
-      orderBy: { genre: 'asc' }
+      where: { genre: { not: null } },
     });
     
-    // Extrair gêneros únicos
-    const uniqueGenres = [...new Set(books.map(book => book.genre))];
-    return uniqueGenres;
+    const uniqueGenres = [...new Set(books.map(book => book.genre).filter(Boolean))] as string[];
+    return uniqueGenres.sort();
   }
 
   // ⬇️ Para compatibilidade

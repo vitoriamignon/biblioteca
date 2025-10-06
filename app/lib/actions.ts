@@ -1,242 +1,218 @@
-// app/lib/actions.ts
-'use server';
+// lib/actions.ts - VERSÃO FINAL PARA DEPLOY
+import { createClient } from '@libsql/client';
 
-import { redirect } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
-import { prisma } from './prisma'; // ⬅️ Importar Prisma
-import { BookStatus } from '@prisma/client'; // ⬅️ Importar enum do Prisma
-
-// Server Action para criar um novo livro
-export async function createBook(formData: FormData) {
-  try {
-    const bookData = {
-      title: formData.get('title') as string,
-      author: formData.get('author') as string,
-      genre: formData.get('genre') as string,
-      year: parseInt(formData.get('year') as string),
-      pages: parseInt(formData.get('pages') as string),
-      rating: parseFloat(formData.get('rating') as string) || 0,
-      synopsis: formData.get('synopsis') as string || '',
-      cover: formData.get('cover') as string || '',
-      status: (formData.get('status') as BookStatus) || 'QUERO_LER',
-      // ⬇️ NOVOS CAMPOS
-      currentPage: parseInt(formData.get('currentPage') as string) || 0,
-      isbn: formData.get('isbn') as string || '',
-      notes: formData.get('notes') as string || '',
-    };
-
-    // Validação básica
-    if (!bookData.title || !bookData.author || !bookData.genre) {
-      throw new Error('Título, autor e gênero são obrigatórios');
-    }
-
-    if (!bookData.year || !bookData.pages) {
-      throw new Error('Ano e número de páginas são obrigatórios');
-    }
-
-    // ⬇️ USANDO PRISMA - substituir bookDatabase.createBook()
-    await prisma.book.create({
-      data: bookData
-    });
-
-    // Revalidar as páginas que mostram livros
-    revalidatePath('/library');
-    revalidatePath('/dashboard');
-
-  } catch (error) {
-    console.error('Erro ao criar livro:', error);
-    throw error;
+// Configuração segura do Turso
+function getTursoClient() {
+  const url = process.env.DATABASE_URL;
+  const authToken = process.env.TURSO_AUTH_TOKEN;
+  
+  if (!url || !authToken) {
+    console.warn('⚠️ Variáveis do Turso não configuradas');
+    return null;
   }
-
-  redirect('/library');
-}
-
-// Server Action para atualizar um livro
-export async function updateBook(id: string, formData: FormData) {
+  
   try {
-    const updateData: Record<string, unknown> = {};
-
-    // Campos existentes
-    const title = formData.get('title') as string;
-    if (title) updateData.title = title;
-
-    const author = formData.get('author') as string;
-    if (author) updateData.author = author;
-
-    const genre = formData.get('genre') as string;
-    if (genre) updateData.genre = genre;
-
-    const year = formData.get('year') as string;
-    if (year) updateData.year = parseInt(year);
-
-    const pages = formData.get('pages') as string;
-    if (pages) updateData.pages = parseInt(pages);
-
-    const rating = formData.get('rating') as string;
-    if (rating) updateData.rating = parseFloat(rating);
-
-    const synopsis = formData.get('synopsis') as string;
-    if (synopsis !== null) updateData.synopsis = synopsis;
-
-    const cover = formData.get('cover') as string;
-    if (cover !== null) updateData.cover = cover;
-
-    const status = formData.get('status') as BookStatus;
-    if (status) updateData.status = status;
-
-    // ⬇️ NOVOS CAMPOS
-    const currentPage = formData.get('currentPage') as string;
-    if (currentPage) updateData.currentPage = parseInt(currentPage);
-
-    const isbn = formData.get('isbn') as string;
-    if (isbn !== null) updateData.isbn = isbn;
-
-    const notes = formData.get('notes') as string;
-    if (notes !== null) updateData.notes = notes;
-
-    // ⬇️ USANDO PRISMA - substituir bookDatabase.updateBook()
-    const updatedBook = await prisma.book.update({
-      where: { id },
-      data: updateData
-    });
-
-    if (!updatedBook) {
-      throw new Error('Livro não encontrado');
-    }
-
-    revalidatePath('/library');
-    revalidatePath('/dashboard');
-    revalidatePath(`/library/${id}`);
-
+    return createClient({ url, authToken });
   } catch (error) {
-    console.error('Erro ao atualizar livro:', error);
-    throw error;
-  }
-
-  redirect(`/library/${id}`);
-}
-
-// Server Action para excluir um livro
-export async function deleteBook(id: string) {
-  try {
-    // ⬇️ USANDO PRISMA - substituir bookDatabase.deleteBook()
-    const deleted = await prisma.book.delete({
-      where: { id }
-    });
-
-    if (!deleted) {
-      throw new Error('Livro não encontrado');
-    }
-
-    revalidatePath('/library');
-    revalidatePath('/dashboard');
-
-  } catch (error) {
-    console.error('Erro ao excluir livro:', error);
-    throw error;
-  }
-
-  redirect('/library');
-}
-
-// Server Action para buscar livros
-export async function getBooks(searchParams?: {
-  search?: string;
-  genre?: string;
-  status?: BookStatus;
-}) {
-  try {
-    let where: any = {};
-
-    if (searchParams?.search) {
-      where.OR = [
-        { title: { contains: searchParams.search, mode: 'insensitive' } },
-        { author: { contains: searchParams.search, mode: 'insensitive' } },
-        { synopsis: { contains: searchParams.search, mode: 'insensitive' } }
-      ];
-    }
-    
-    if (searchParams?.genre && searchParams.genre !== 'all') {
-      where.genre = searchParams.genre;
-    }
-    
-    if (searchParams?.status) {
-      where.status = searchParams.status;
-    }
-
-    // ⬇️ USANDO PRISMA
-    return await prisma.book.findMany({
-      where,
-      orderBy: { createdAt: 'desc' }
-    });
-  } catch (error) {
-    console.error('Erro ao buscar livros:', error);
-    return [];
-  }
-}
-
-// Server Action para obter um livro por ID
-export async function getBook(id: string) {
-  try {
-    // ⬇️ USANDO PRISMA
-    return await prisma.book.findUnique({
-      where: { id }
-    });
-  } catch (error) {
-    console.error('Erro ao buscar livro:', error);
+    console.error('❌ Erro ao criar cliente Turso:', error);
     return null;
   }
 }
 
-// Server Action para obter estatísticas
 export async function getStats() {
+  const client = getTursoClient();
+  
+  if (!client) {
+    console.warn('⚠️ Retornando stats vazios (Turso não configurado)');
+    return {
+      totalBooks: 0,
+      booksByStatus: {
+        QUERO_LER: 0,
+        LENDO: 0,
+        LIDO: 0,
+        PAUSADO: 0,
+        ABANDONADO: 0
+      },
+      totalPages: 0,
+      favoriteGenre: 'Nenhum'
+    };
+  }
+
   try {
-    // ⬇️ USANDO PRISMA - substituir bookDatabase.getStats()
-    const [total, reading, read, wantToRead, paused, abandoned, pagesResult, ratingResult] = await Promise.all([
-      prisma.book.count(),
-      prisma.book.count({ where: { status: 'LENDO' } }),
-      prisma.book.count({ where: { status: 'LIDO' } }),
-      prisma.book.count({ where: { status: 'QUERO_LER' } }),
-      prisma.book.count({ where: { status: 'PAUSADO' } }),
-      prisma.book.count({ where: { status: 'ABANDONADO' } }),
-      prisma.book.aggregate({ _sum: { pages: true } }),
-      prisma.book.aggregate({ _avg: { rating: true } })
-    ]);
+    // Busca estatísticas dos livros
+    const totalBooksResult = await client.execute('SELECT COUNT(*) as total FROM Book');
+    const totalBooks = totalBooksResult.rows[0].total as number;
+
+    // Livros por status
+    const statusResult = await client.execute(`
+      SELECT status, COUNT(*) as count 
+      FROM Book 
+      GROUP BY status
+    `);
+
+    const booksByStatus = {
+      QUERO_LER: 0,
+      LENDO: 0,
+      LIDO: 0,
+      PAUSADO: 0,
+      ABANDONADO: 0
+    };
+
+    statusResult.rows.forEach(row => {
+      const status = row.status as keyof typeof booksByStatus;
+      const count = row.count as number;
+      if (status in booksByStatus) {
+        booksByStatus[status] = count;
+      }
+    });
+
+    // Total de páginas
+    const pagesResult = await client.execute('SELECT SUM(pages) as total FROM Book WHERE status = "LIDO"');
+    const totalPages = pagesResult.rows[0].total as number || 0;
+
+    // Gênero favorito
+    const genreResult = await client.execute(`
+      SELECT genre, COUNT(*) as count 
+      FROM Book 
+      WHERE genre IS NOT NULL AND genre != '' 
+      GROUP BY genre 
+      ORDER BY count DESC 
+      LIMIT 1
+    `);
+
+    const favoriteGenre = genreResult.rows.length > 0 
+      ? (genreResult.rows[0].genre as string) 
+      : 'Nenhum';
 
     return {
-      total,
-      reading,
-      read,
-      wantToRead: wantToRead,
-      paused,
-      abandoned,
-      totalPages: pagesResult._sum.pages || 0,
-      averageRating: ratingResult._avg.rating || 0
+      totalBooks,
+      booksByStatus,
+      totalPages,
+      favoriteGenre
     };
+
   } catch (error) {
-    console.error('Erro ao buscar estatísticas:', error);
+    console.error('❌ Erro ao buscar estatísticas:', error);
     return {
-      total: 0,
-      reading: 0,
-      read: 0,
-      wantToRead: 0,
-      paused: 0,
-      abandoned: 0,
+      totalBooks: 0,
+      booksByStatus: {
+        QUERO_LER: 0,
+        LENDO: 0,
+        LIDO: 0,
+        PAUSADO: 0,
+        ABANDONADO: 0
+      },
       totalPages: 0,
-      averageRating: 0
+      favoriteGenre: 'Nenhum'
     };
   }
 }
 
-// Server Action para obter gêneros
-export async function getGenres() {
+export interface Book {
+  id: string;
+  title: string;
+  author: string;
+  genre?: string;
+  year: number;
+  pages: number;
+  rating: number;
+  synopsis: string;
+  cover?: string;
+  status: 'QUERO_LER' | 'LENDO' | 'LIDO' | 'PAUSADO' | 'ABANDONADO';
+  currentPage: number;
+  isbn?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Genre {
+  id: string;
+  name: string;
+}
+
+export async function getBooks(filters?: {
+  search?: string;
+  genre?: string;
+  status?: string;
+}): Promise<Book[]> {
+  const client = getTursoClient();
+  
+  if (!client) {
+    console.warn('📚 Retornando array vazio (Turso não configurado)');
+    return [];
+  }
+
   try {
-    // ⬇️ USANDO PRISMA
-    return await prisma.genre.findMany({
-      orderBy: { name: 'asc' }
-    });
+    let sql = `SELECT * FROM Book WHERE 1=1`;
+    const args: any[] = [];
+
+    if (filters?.search) {
+      sql += ` AND (title LIKE ? OR author LIKE ?)`;
+      const searchTerm = `%${filters.search}%`;
+      args.push(searchTerm, searchTerm);
+    }
+
+    if (filters?.genre && filters.genre !== 'all') {
+      sql += ` AND genre = ?`;
+      args.push(filters.genre);
+    }
+
+    if (filters?.status) {
+      sql += ` AND status = ?`;
+      args.push(filters.status);
+    }
+
+    sql += ` ORDER BY title ASC`;
+
+    const result = await client.execute({ sql, args });
+    
+    return result.rows.map(row => ({
+      id: row.id as string,
+      title: row.title as string,
+      author: row.author as string,
+      genre: row.genre as string,
+      year: row.year as number,
+      pages: row.pages as number,
+      rating: row.rating as number,
+      synopsis: row.synopsis as string,
+      cover: row.cover as string,
+      status: row.status as any,
+      currentPage: row.currentPage as number,
+      isbn: row.isbn as string,
+      notes: row.notes as string,
+      createdAt: row.createdAt as string,
+      updatedAt: row.updatedAt as string,
+    }));
+
   } catch (error) {
-    console.error('Erro ao buscar gêneros:', error);
+    console.error('❌ Erro ao buscar livros do Turso:', error);
+    return [];
+  }
+}
+
+export async function getGenres(): Promise<Genre[]> {
+  const client = getTursoClient();
+  
+  if (!client) {
+    return [];
+  }
+
+  try {
+    const result = await client.execute(`
+      SELECT DISTINCT genre as name 
+      FROM Book 
+      WHERE genre IS NOT NULL AND genre != ''
+      ORDER BY genre ASC
+    `);
+
+    return result.rows.map(row => ({
+      id: row.name as string,
+      name: row.name as string,
+    }));
+
+  } catch (error) {
+    console.error('❌ Erro ao buscar gêneros:', error);
     return [];
   }
 }
